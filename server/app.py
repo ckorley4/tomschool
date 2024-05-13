@@ -41,17 +41,24 @@ def student_by_id(id):
                 return make_response({"errors": ["validation errors"]},400)
         else:
             return make_response({"error": "Student not Found"},404)
+
+@app.route('/enrollments/student/<int:id>')
+def enrollment_student_by_id(id):
+   student_enroll_list= Enrollment.query.filter(Enrollment.student_id==id).all()
+   enrollment_student = [enrollment.to_dict() for enrollment in student_enroll_list]
+   if enrollment_student:
+        return make_response(enrollment_student,200)
+   else:
+        return make_response({"Error":"NO enrollments found"},404)
         
-@app.route('/enrollments/<int:id>', methods =['GET','POST','PATCH','DELETE'])
+@app.route('/enrollments/<int:id>', methods =['GET','PATCH','DELETE'])
 def enrollment_by_id(id):
-    enrollment = Enrollment.query.filter(Enrollment.user_id == id)
+    enrollment = Enrollment.query.filter(Enrollment.id == id).first()
     if enrollment:
         if request.method == 'DELETE':
             db.session.delete(enrollment)
             db.session.commit()
             return make_response(enrollment.to_dict(),202)
-        elif request.method == 'GET':
-            return make_response(enrollment.to_dict(),200)
         elif request.method == 'PATCH':
             try:
                 incoming = request.get_json()
@@ -61,28 +68,31 @@ def enrollment_by_id(id):
                 return make_response(enrollment.to_dict(),201)
             except:
                 return make_response({"errors": ["validation errors"]},400)
+        elif request.method == 'GET':
+             return make_response(enrollment.to_dict(),200)
         else:
-            return make_response({"error": "Student not Found"},404)
+            return make_response({"error": "Enroolment not Found"},404)
+   
         
 
 
 @app.route('/courses/<int:id>', methods =['GET','PATCH','DELETE'])
 def course_by_id(id):
-    enrollment = Course.query.filter(Course.id == id).first()
-    if enrollment:
+    course = Course.query.filter(Course.id == id).first()
+    if course:
         if request.method == 'DELETE':
-            db.session.delete(enrollment)
+            db.session.delete(course)
             db.session.commit()
-            return make_response(enrollment.to_dict(),202)
+            return make_response(course.to_dict(),202)
         elif request.method == 'GET':
-            return make_response(enrollment.to_dict(rules=("-enrollments",)),200)
+            return make_response(course.to_dict(rules=("-enrollments",)),200)
         elif request.method == 'PATCH':
             try:
                 incoming = request.get_json()
                 for attr in incoming:
-                    setattr(enrollment,attr,incoming[attr])
+                    setattr(course,attr,incoming[attr])
                     db.session.commit()
-                return make_response(enrollment.to_dict(),201)
+                return make_response(course.to_dict(),201)
             except:
                 return make_response({"errors": ["validation errors"]},400)
             
@@ -128,25 +138,12 @@ def enrollments():
         #ipdb.set_trace()
         incoming = request.get_json()
         student_id =incoming['student_id']
-        user_id=incoming['user_id']
+        #user_id=incoming['user_id']
         course_id=incoming['course_id']
         new = Enrollment(**incoming)
         db.session.add(new)
         db.session.commit()
         return make_response(new.to_dict(),201)
-
-@app.route('/me', methods=['GET','POST'])
-def en():
-     if request.method == "GET":
-        enrollment_list =[enrollment.to_dict() for enrollment in Enrollment.query.all()]
-        return make_response(enrollment_list,200)
-     elif request.method == "POST":
-        #ipdb.set_trace()
-        incoming = request.get_json()
-        new_hero_power = Molas(**incoming)
-        db.session.add(new_hero_power)
-        db.session.commit()
-        return make_response(new_hero_power.to_dict(),201)
 
 @app.route('/users', methods=['POST'])
 def register_user():
@@ -216,7 +213,7 @@ def signup():
     session['name']=newUser.id
     return make_response(newUser.to_dict(),200)
 
-@app.route('/login',methods=['POST'])
+@app.route('/logins',methods=['POST'])
 def login():
     user=User.query.filter_by(uname=request.json()['uname']).first()
     session['name']=user.id

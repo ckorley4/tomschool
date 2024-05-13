@@ -108,7 +108,7 @@ class Users(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email =db.Column(db.String(255), nullable=False, unique=True)
     username =db.Column(db.String(100), nullable=False, unique=True)
-    password_hash =db.Column(db.String(255), nullable=False)
+   
 
     #enrollment = db.relationship("Enrollment", back_populates="user")
 
