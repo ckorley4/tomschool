@@ -29,7 +29,7 @@ class Student(db.Model,SerializerMixin):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-    enrollments = db.relationship('Enrollment',back_populates='student',cascade="all,delete")
+    #enrollments = db.relationship('Enrollment',back_populates='student',cascade="all,delete")
     
    
 
@@ -38,20 +38,27 @@ class Student(db.Model,SerializerMixin):
 
 class Enrollment(db.Model,SerializerMixin):
     __tablename__ = 'enrollments'
-    id = db.Column(db.Integer,primary_key =True)
-    student_id = db.Column(db.Integer,db.ForeignKey('students.id'))
-    course_id = db.Column(db.Integer,db.ForeignKey('courses.id'))
+    id = db.Column(db.Integer,primary_key=True)
+    student_id = db.Column(db.Integer)
+    course_id = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
-    student = db.relationship('Student',back_populates='enrollments',cascade="all,delete")
-    course =  db.relationship('Course',back_populates='enrollments',cascade="all,delete")
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship("Users", back_populates="enrollment")
-    serialize_rules = ( "-student.enrollments","-course.enrollments" )
+    #student = db.relationship('Student',back_populates='enrollments',cascade="all,delete")
+    #course =  db.relationship('Course',back_populates='enrollments',cascade="all,delete")
+    user_id = db.Column(db.Integer)
+    #user = db.relationship("Users", back_populates="enrollment")
+    #serialize_rules = ( "-student.enrollments","-course.enrollments" )
 
     def __repr__(self):
-        return f'<Enrollment {self.id}>'
+        return f'<Enrollment {self.id} >'
 
+class Molas(db.Model,SerializerMixin):
+    __tablename__='me'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id= db.Column(db.Integer)
+    course_id= db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 class Course(db.Model,SerializerMixin):
     __tablename__ = 'courses'
 
@@ -66,7 +73,7 @@ class Course(db.Model,SerializerMixin):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
     instructor = db.relationship('Instructor',back_populates='courses',cascade="all,delete")
     venue = db.relationship('Venue',back_populates='courses',cascade="all,delete")
-    enrollments = db.relationship('Enrollment',back_populates='course',cascade="all,delete")
+    #enrollments = db.relationship('Enrollment',back_populates='course',cascade="all,delete")
     serialize_rules = ("-instructor.courses","-venue.courses")
 
     def __repr__(self):
@@ -103,7 +110,7 @@ class Users(db.Model, SerializerMixin):
     username =db.Column(db.String(100), nullable=False, unique=True)
     password_hash =db.Column(db.String(255), nullable=False)
 
-    enrollment = db.relationship("Enrollment", back_populates="user")
+    #enrollment = db.relationship("Enrollment", back_populates="user")
 
     serialize_rules = ('-password_hash',)  # Example rule to exclude password_hash from serialization
 

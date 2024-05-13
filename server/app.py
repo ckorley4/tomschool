@@ -7,19 +7,13 @@ from flask import Flask, request, make_response
 from flask_restful import Resource,Api
 from flask import Flask, make_response, jsonify,session,redirect,url_for
 from authlib.integrations.flask_client import OAuth
-import os
+import os,ipdb
 from flask_migrate import Migrate
-import os
 # Local imports
 from config import app,db
-from models import Venue,Student,Instructor,Course,Enrollment,Users,User
+from models import Venue,Student,Instructor,Course,Enrollment,Users,User,Molas
 from werkzeug.security import generate_password_hash, check_password_hash
 
-#b'\xd7\x1eYAO\xdbl[\x9d\xda\xb9h\x08\x9c\xd6\xd7'
-# Add your model import
-#app.secret_key=b'\xd7\x1eYAO\xdbl[\x9d\xda\xb9h\x08\x9c\xd6\xd7'
-
-#Auth goes here
 
 @app.route('/students', methods=['GET'])
 def index():
@@ -131,17 +125,29 @@ def enrollments():
         enrollment_list =[enrollment.to_dict() for enrollment in Enrollment.query.all()]
         return make_response(enrollment_list,200)
      elif request.method == "POST":
-        try:
-            incoming = request.get_json()
-            new_enrollment = Enrollment(**incoming)
-            db.session.add(new_enrollment)
-            db.session.commit()
-            return make_response(new_enrollment.to_dict,201)
-        except:
-            return make_response({"errors": ["Nii"]},400)
-  
-    
-   
+        #ipdb.set_trace()
+        incoming = request.get_json()
+        student_id =incoming['student_id']
+        user_id=incoming['user_id']
+        course_id=incoming['course_id']
+        new = Enrollment(**incoming)
+        db.session.add(new)
+        db.session.commit()
+        return make_response(new.to_dict(),201)
+
+@app.route('/me', methods=['GET','POST'])
+def en():
+     if request.method == "GET":
+        enrollment_list =[enrollment.to_dict() for enrollment in Enrollment.query.all()]
+        return make_response(enrollment_list,200)
+     elif request.method == "POST":
+        #ipdb.set_trace()
+        incoming = request.get_json()
+        new_hero_power = Molas(**incoming)
+        db.session.add(new_hero_power)
+        db.session.commit()
+        return make_response(new_hero_power.to_dict(),201)
+
 @app.route('/users', methods=['POST'])
 def register_user():
     data = request.json
