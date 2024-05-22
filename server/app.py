@@ -12,7 +12,9 @@ from flask_migrate import Migrate
 # Local imports
 from config import app,db
 from models import Venue,Student,Instructor,Course,Enrollment,Users,User,Molas
+from flask_httpauth import HTTPTokenAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+
 
 
 @app.route('/students', methods=['GET'])
@@ -173,53 +175,65 @@ def register_user():
     }), 201
 
 # Log in an existing user
-@app.route('/users', methods=['POST'])
-def login_user():
+
+tokens = {}
+
+@app.route('/auth/google', methods=['POST'])
+def google_login():
     data = request.json
-    email = data.get('email')
-    password = data.get('password')
-
-    user = Users.query.filter_by(email=email).first()
-
-    if user and check_password_hash(user.password_hash, password):
-        # Include user_id and username in the successful login response as a single JSON object
-        return jsonify({
-            'message': 'Login successful',
-            'user_id': user.id,
-            'username': user.username  # This now correctly adds the username to the response
-        }), 200
-    else:
-        return jsonify({'message': 'Invalid email or password'}), 401
+    user = User.query.filter_by(email=data['email']).first()
+    if not user:
+        user = User(name=data['name'], email=data['email'], provider='google', image_url=data['imageUrl'])
+        db.session.add(user)
+        db.session.commit()
     
+    token = os.urandom(24).hex()
+    tokens[token] = user.email
+    response = make_response(jsonify({'message': 'Login successful'}))
+    response.set_cookie('token', token)
+    return response
 
+@app.route('/auth/github', methods=['POST'])
+def github_login():
+    code = request.json.get('code')
+    client_id = 'YOUR_GITHUB_CLIENT_ID'
+    client_secret = 'YOUR_GITHUB_CLIENT_SECRET'
 
-@app.route('/authorize')
-def authorize():
-  
-    return redirect('/courses')
+    token_response = requests.post(
+        'https://github.com/login/oauth/access_token',
+        headers={'Accept': 'application/json'},
+        data={
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'code': code
+        }
+    )
+    token_response_data = token_response.json()
+    access_token = token_response_data.get('access_token')
 
-@app.route('/logout')
-def logout():
-    for key in list(session.keys()):
-        session.pop(key)
-    return redirect('/')
-
-@app.route('/signup',methods=['POST'])
-def signup():
-    user=request.json
-    newUser =User(**user)
-    db.session.add(newUser)
-    db.session.commit()
-    session['name']=newUser.id
-    return make_response(newUser.to_dict(),200)
-
-@app.route('/logins',methods=['POST'])
-def login():
-    user=User.query.filter_by(uname=request.json()['uname']).first()
-    session['name']=user.id
-    return make_response({},200)
+    user_response = requests.get(
+        'https://api.github.com/user',
+        headers={
+            'Authorization': f'token {access_token}',
+            'Accept': 'application/json'
+        }
+    )
+    user_data = user_response.json()
+    
+    user = User.query.filter_by(email=user_data['email']).first()
+    if not user:
+        user = User(name=user_data['name'], email=user_data['email'], provider='github', image_url=user_data['avatar_url'])
+        db.session.add(user)
+        db.session.commit()
+    
+    token = os.urandom(24).hex()
+    tokens[token] = user.email
+    response = make_response(jsonify({'message': 'Login successful'}))
+    response.set_cookie('token', token)
+    return response
 
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
+
 

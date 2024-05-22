@@ -3,6 +3,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates
 from config import db
 from datetime import datetime
+from flask_httpauth import HTTPTokenAuth
 
 # Models go here!
 convention = {
@@ -119,8 +120,11 @@ class Users(db.Model, SerializerMixin):
 
 
 class User(db.Model,SerializerMixin):
-    __tablename__='user'
-    id=db.Column(db.Integer,primary_key=True)
-    email=db.Column(db.String)
-    uname=db.Column(db.String)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    provider = db.Column(db.String(50), nullable=False)
+    image_url = db.Column(db.String(250))
+
+    
     
