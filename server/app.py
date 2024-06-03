@@ -193,24 +193,61 @@ def google_login():
     response.set_cookie('token', token)
     return response
 
-@app.route('/auth/github', methods=['POST'])
+
+
+
+#New things start here
+users = {}
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    if email in users:
+        return jsonify({'error': 'User already exists'}), 400
+
+    users[email] = password
+    return jsonify({'message': 'User created successfully'}), 201
+
+@app.route('/signin', methods=['POST'])
+def signin():
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    if email not in users or users[email] != password:
+        return jsonify({'error': 'Invalid email or password'}), 401
+
+    return jsonify({'message': 'Sign in successful'}), 200
+
+GITHUB_CLIENT_ID = 'Ov23liI8zvyd2KimM2IE'
+GITHUB_CLIENT_SECRET = 'b8109b35a3adca5ddc3fcfaeb86edc5ac210e393'
+
+@app.route('/github/login', methods=['POST'])
 def github_login():
     code = request.json.get('code')
-    client_id = 'YOUR_GITHUB_CLIENT_ID'
-    client_secret = 'YOUR_GITHUB_CLIENT_SECRET'
+    if not code:
+        return jsonify({'error': 'Code is required'}), 400
 
+    # Exchange code for access token
     token_response = requests.post(
         'https://github.com/login/oauth/access_token',
         headers={'Accept': 'application/json'},
         data={
-            'client_id': client_id,
-            'client_secret': client_secret,
+            'client_id': GITHUB_CLIENT_ID,
+            'client_secret': GITHUB_CLIENT_SECRET,
             'code': code
         }
     )
-    token_response_data = token_response.json()
-    access_token = token_response_data.get('access_token')
 
+    token_json = token_response.json()
+    access_token = token_json.get('access_token')
+    if not access_token:
+        return jsonify({'error': 'Failed to get access token'}), 400
+
+    # Get user info
     user_response = requests.get(
         'https://api.github.com/user',
         headers={
@@ -218,20 +255,8 @@ def github_login():
             'Accept': 'application/json'
         }
     )
-    user_data = user_response.json()
-    
-    user = User.query.filter_by(email=user_data['email']).first()
-    if not user:
-        user = User(name=user_data['name'], email=user_data['email'], provider='github', image_url=user_data['avatar_url'])
-        db.session.add(user)
-        db.session.commit()
-    
-    token = os.urandom(24).hex()
-    tokens[token] = user.email
-    response = make_response(jsonify({'message': 'Login successful'}))
-    response.set_cookie('token', token)
-    return response
-
+    user_json = user_response.json()
+    return jsonify(user_json)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
