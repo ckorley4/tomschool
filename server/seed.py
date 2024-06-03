@@ -74,9 +74,15 @@ if __name__ == '__main__':
         # Creating Courses with tech-related names, images, and descriptions
         print("Creating Courses")
         tech_images = [
-            "https://example.com/tech_image1.jpg",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQG30WqshNW1e9qJX1lgL4or4Zn1lGpfRMsA&s"
+
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcLQqP4j5oTee7SaZ1j9nZ103BLnZG9KTk6Q&s"
             "https://example.com/tech_image2.jpg",
-            "https://example.com/tech_image3.jpg",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnzZ__J_zkRMmNv0kO8I1Tu3Y1Bk6PphSVxQ&s"
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdBnCwEWNjYw3_IqBSG59kB-SqZxDV4G7_AQ&s"
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXwWPGhCN2YY2wu9tCtYe5fhKe7XcJSrWqbA&s"
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS35HQfx6CQ8OinnrRCoV_nkmwwcL_uXscz6g&s"
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREooNbIgw1hJQa-Ah6e6PX6zWB1kIYNbXtyA&s",
             # Add more tech-related image URLs here
         ]
         
@@ -95,14 +101,14 @@ if __name__ == '__main__':
         ]
 
         courses = []
-        for _ in range(100):
+        for _ in range(30):
             course = Course(
                 title=rc(course_titles),
                 category="Technology",
                 image=rc(tech_images),
-                instructor_id=randint(1, 4),
-                venue_id=randint(1, 5),
-                description=fake.paragraph(nb_sentences=5)
+                #instructor_id=randint(1, 4),
+                #venue_id=randint(1, 5),
+                description=fake.paragraph(nb_sentences=3)
             )
             courses.append(course)
         
@@ -115,7 +121,7 @@ if __name__ == '__main__':
         for _ in range(50):  # assuming 50 enrollments for example
             enrollment = Enrollment(
                 student_id=randint(1, 15),
-                course_id=randint(1, 100),
+                course_id=randint(1, 40),
                 user_id=randint(1, 4)  # assuming 4 users
             )
             enrollments.append(enrollment)

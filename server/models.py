@@ -68,12 +68,12 @@ class Course(db.Model,SerializerMixin):
     category = db.Column(db.String)
     image = db.Column(db.String)
     title = db.Column(db.String)
-    venue_id = db.Column(db.String,db.ForeignKey('venues.id'))
-    instructor_id = db.Column(db.Integer,db.ForeignKey('instructors.id'))
+    #venue_id = db.Column(db.String,db.ForeignKey('venues.id'))
+    #instructor_id = db.Column(db.Integer,db.ForeignKey('instructors.id'))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
-    instructor = db.relationship('Instructor',back_populates='courses',cascade="all,delete")
-    venue = db.relationship('Venue',back_populates='courses',cascade="all,delete")
+    #instructor = db.relationship('Instructor',back_populates='courses',cascade="all,delete")
+    #venue = db.relationship('Venue',back_populates='courses',cascade="all,delete")
     #enrollments = db.relationship('Enrollment',back_populates='course',cascade="all,delete")
     serialize_rules = ("-instructor.courses","-venue.courses")
 
@@ -87,7 +87,7 @@ class Instructor(db.Model,SerializerMixin):
     name = db.Column(db.String)
     department = db.Column(db.String)
     specialty = db.Column(db.String)
-    courses=db.relationship(Course,back_populates='instructor')
+   # courses=db.relationship(Course,back_populates='instructor')
 
 
 
@@ -99,7 +99,7 @@ class Venue(db.Model,SerializerMixin):
     
     id = db.Column(db.Integer,primary_key=True)
     location = db.Column(db.String)
-    courses=db.relationship(Course,back_populates='venue')
+    #courses=db.relationship(Course,back_populates='venue')
 
     def __repr__(self):
         return f'<Venue {self.id}  {self.location}>'
@@ -108,9 +108,7 @@ class Users(db.Model, SerializerMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email =db.Column(db.String(255), nullable=False, unique=True)
-    username =db.Column(db.String(100), nullable=False, unique=True)
    
-
     #enrollment = db.relationship("Enrollment", back_populates="user")
 
     serialize_rules = ('-password_hash',)  # Example rule to exclude password_hash from serialization

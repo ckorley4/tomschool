@@ -10,6 +10,7 @@ from authlib.integrations.flask_client import OAuth
 import os,ipdb
 from flask_migrate import Migrate
 # Local imports
+import requests
 from config import app,db
 from models import Venue,Student,Instructor,Course,Enrollment,Users,User,Molas
 from flask_httpauth import HTTPTokenAuth
@@ -147,11 +148,11 @@ def enrollments():
         db.session.commit()
         return make_response(new.to_dict(),201)
 
-@app.route('/users', methods=['POST'])
+@app.route('/users', methods=['GET','POST'])
 def register_user():
+    
     data = request.json
     email = data.get('email')
-    username = data.get('username')
     password = data.get('password')
 
     # Check if user already exists
@@ -227,7 +228,10 @@ GITHUB_CLIENT_SECRET = 'b8109b35a3adca5ddc3fcfaeb86edc5ac210e393'
 
 @app.route('/github/login', methods=['POST'])
 def github_login():
-    code = request.json.get('code')
+    data = request.json
+    print(data)
+    code = data.get('code')
+    #code = request.json.get('code')
     if not code:
         return jsonify({'error': 'Code is required'}), 400
 
@@ -236,8 +240,8 @@ def github_login():
         'https://github.com/login/oauth/access_token',
         headers={'Accept': 'application/json'},
         data={
-            'client_id': GITHUB_CLIENT_ID,
-            'client_secret': GITHUB_CLIENT_SECRET,
+            'client_id': 'Ov23liI8zvyd2KimM2IE',
+            'client_secret': 'b8109b35a3adca5ddc3fcfaeb86edc5ac210e393',
             'code': code
         }
     )
